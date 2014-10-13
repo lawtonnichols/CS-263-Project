@@ -9,7 +9,14 @@ public class REST {
 	@Path("test")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String test() {
-		return "Hello, world!2";
+		return "Hello, world! GET";
+	}
+	
+	@POST
+	@Path("posttest")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String posttest(@FormParam("arg") String arg) {
+		return "Hello, world! POST\narg: " + arg + "\n";
 	}
 	
 	//@POST

@@ -15,9 +15,18 @@
 	    <servlet-name>Jersey REST Service</servlet-name>
 	    <url-pattern>/rest/*</url-pattern>
 	</servlet-mapping>
+	<!--<servlet-mapping>
+	    <servlet-name>UploadTile</servlet-name>
+	    <url-pattern>/upload</url-pattern>
+  	</servlet-mapping>
+  	<servlet-mapping>
+	    <servlet-name>TaskQueueWorker</servlet-name>
+	    <url-pattern>/worker</url-pattern>
+  	</servlet-mapping>-->
+	
 
 	<welcome-file-list>
-    	<welcome-file>test.jsp</welcome-file>
+    	<welcome-file>main.jsp</welcome-file>
     </welcome-file-list>
 
 </web-app>
