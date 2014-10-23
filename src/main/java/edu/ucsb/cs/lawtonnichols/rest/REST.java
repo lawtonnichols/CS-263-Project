@@ -21,9 +21,9 @@ public class REST {
 	
 	//@POST
 	@GET
-	@Path("updateTile/{row}/{col}")
+	@Path("downvote/{row}/{col}")
 	//@Consumes(MediaType.APPLICATION_JSON)
-	public Response updateTile(@PathParam("row") int row, @PathParam("col") int col) {
+	public Response downvote(@PathParam("row") int row, @PathParam("col") int col) {
 		return Response.status(200).entity("row: " + row + ", col: " + col).build();
 	}
 	
