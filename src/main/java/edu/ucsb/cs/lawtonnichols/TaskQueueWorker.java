@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.glassfish.jersey.internal.util.Base64;
 
 import com.google.appengine.api.blobstore.*;
+import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.images.*;
 
 public class TaskQueueWorker extends HttpServlet {
@@ -32,7 +33,11 @@ public class TaskQueueWorker extends HttpServlet {
         
         String image = Base64.encodeAsString(newImageData);
         
-        NineTiles.AddImageToTileQueue(row, col, image);
+        try {
+			NineTiles.AddImageToTileQueue(row, col, image);
+		} catch (EntityNotFoundException e) {
+			// can't really do anything here
+		}
         
     }
 

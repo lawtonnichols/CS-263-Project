@@ -1,9 +1,14 @@
 package edu.ucsb.cs.lawtonnichols;
 
 import java.util.Random;
+import java.util.logging.Level;
 
 import com.google.appengine.api.blobstore.*;
+import com.google.appengine.api.memcache.ErrorHandlers;
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.appengine.api.taskqueue.*;
+import com.google.appengine.api.images.*;
 
 import static com.google.appengine.api.taskqueue.TaskOptions.Builder.*;
 
@@ -18,7 +23,24 @@ public class NineTiles {
 		queue.add(withUrl("/worker").param("type", "Convert").param("row", row + "").param("col", col + "").param("blobKey", b.getKeyString()));
 	}
 	
-	public static void AddImageToTileQueue(String row, String col, String base64Image) {
+	public static String GetImageForTile(int t) {
+		MemcacheService syncCache = MemcacheServiceFactory.getMemcacheService();
+        syncCache.setErrorHandler(ErrorHandlers.getConsistentLogAndContinue(Level.INFO));
+        String image = (String) syncCache.get("Image-" + t);
+        if (image == null || image.equals("default")) {
+        	if (image == null)
+        		return "/defaultTile.png?wasnull";
+        	else
+        		return "/defaultTile.png?wasdefault";
+        } else {
+        	BlobKey blobKey = new BlobKey(image);
+        	ImagesService imagesService = ImagesServiceFactory.getImagesService();
+            ServingUrlOptions s = ServingUrlOptions.Builder.withBlobKey(blobKey).imageSize(1000);
+            return imagesService.getServingUrl(s);
+        }
+	}
+	
+	public static void AddImageToTileQueue(String row, String col, String base64Image) throws EntityNotFoundException {
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		Entity main = GetMainEntity();
 		
@@ -49,11 +71,9 @@ public class NineTiles {
 		}
 	}
 	
-	public static Entity GetMainEntity() {
+	public static Entity GetMainEntity() throws EntityNotFoundException {
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		Filter mainFilter = new FilterPredicate("main", FilterOperator.EQUAL, "main");
-		Query q = new Query("Main").setFilter(mainFilter);
-		return datastore.prepare(q).asSingleEntity();
+		return datastore.get(KeyFactory.createKey("Main", "main"));
 	}
 	
 	public static Entity GetTileQueueAtIndex(String row, String col, int index) {
