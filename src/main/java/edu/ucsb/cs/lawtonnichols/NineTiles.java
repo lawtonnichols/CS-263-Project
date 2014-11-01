@@ -27,36 +27,61 @@ public class NineTiles {
 		MemcacheService syncCache = MemcacheServiceFactory.getMemcacheService();
         syncCache.setErrorHandler(ErrorHandlers.getConsistentLogAndContinue(Level.INFO));
         String image = (String) syncCache.get("Image-" + t);
-        if (image == null || image.equals("default")) {
-        	if (image == null)
+        if (image == null) {
+        	// get the image from the datastore
+        	try {
+        		Entity main = NineTiles.GetMainEntity();
+        		image = (String) main.getProperty("Image-"+t);
+        		syncCache.put("Image-"+t, image);
+        		if (image == null) // this probably means that setup hasn't been run
+        			return "defaultTile.png?thisisaproblem";
+        	} catch (EntityNotFoundException e) {
         		return "/defaultTile.png?wasnull";
-        	else
-        		return "/defaultTile.png?wasdefault";
+        	}
+        }
+        
+        if (image.equals("default")) {
+        	return "/defaultTile.png?wasdefault";
         } else {
         	BlobKey blobKey = new BlobKey(image);
         	ImagesService imagesService = ImagesServiceFactory.getImagesService();
             ServingUrlOptions s = ServingUrlOptions.Builder.withBlobKey(blobKey).imageSize(1000);
-            return imagesService.getServingUrl(s);
+            try {
+            	return imagesService.getServingUrl(s);
+            } catch (Exception e) {
+            	return "defaultTile.png?"+image;
+            }
         }
 	}
 	
-	public static void AddImageToTileQueue(String row, String col, String base64Image) throws EntityNotFoundException {
+	public static void AddImageToTileQueue(String row, String col, String blobKey) throws EntityNotFoundException {
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		MemcacheService syncCache = MemcacheServiceFactory.getMemcacheService();
+        syncCache.setErrorHandler(ErrorHandlers.getConsistentLogAndContinue(Level.INFO));
 		Entity main = GetMainEntity();
 		
 		// get the size of the queue for the current row & column
-		Integer size = (Integer) main.getProperty("queueSize-"+row+"-"+col);
+		int r = Integer.parseInt(row);
+		int c = Integer.parseInt(col);
+		int i = ((r-1) * 3 + c);
+		int size = ((Long) main.getProperty("QueueSize-"+i)).intValue();
 		
-		// make sure adding 1 wouldn't make it >= 100
+		// make sure adding 1 wouldn't make it >= 101
 		// if not, add it to the queue at the next index
-		if (size+1 < 100) {
-			Entity queue = GetTileQueueAtIndex(row, col, size+1);
+		if (size+1 < 101) {
+			Entity queue = GetTileQueueAtIndex(i, size+1);
 			
 			// set size = size + 1
-			main.setProperty("queueSize-"+row+"-"+col, size+1);
+			main.setProperty("QueueSize-"+i, size+1);
 			
 			// add in the image
-			queue.setProperty("image", base64Image);
+			queue.setProperty("image", blobKey);
+			
+			// change the tile if this is the first one added
+			if (size + 1 == 1) {
+				main.setProperty("Image-"+i, blobKey);
+		        syncCache.put("Image-"+i, blobKey);
+			}
 			
 			// update everything
 			datastore.put(main);
@@ -64,9 +89,9 @@ public class NineTiles {
 		}
 		// otherwise, replace one of the others (except the first)
 		else {
-			int index = (new Random().nextInt(99)) + 1;
-			Entity queue = GetTileQueueAtIndex(row, col, index);
-			queue.setProperty("image", base64Image);
+			int index = (new Random().nextInt(99)) + 2;
+			Entity queue = GetTileQueueAtIndex(i, index);
+			queue.setProperty("image", blobKey);
 			datastore.put(queue);
 		}
 	}
@@ -76,12 +101,8 @@ public class NineTiles {
 		return datastore.get(KeyFactory.createKey("Main", "main"));
 	}
 	
-	public static Entity GetTileQueueAtIndex(String row, String col, int index) {
+	public static Entity GetTileQueueAtIndex(int rowcol, int index) throws EntityNotFoundException {
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		Filter rowFilter = new FilterPredicate("row", FilterOperator.EQUAL, row);
-		Filter colFilter = new FilterPredicate("col", FilterOperator.EQUAL, col);
-		Filter indexFilter = new FilterPredicate("index", FilterOperator.EQUAL, index);
-		Query q = new Query("TileQueues").setFilter(CompositeFilterOperator.and(rowFilter, colFilter, indexFilter));
-		return datastore.prepare(q).asSingleEntity();
+		return datastore.get(KeyFactory.createKey("ImageQueue-"+rowcol, index+""));
 	}
 }

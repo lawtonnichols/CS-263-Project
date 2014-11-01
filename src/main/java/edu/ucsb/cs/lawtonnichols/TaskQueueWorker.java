@@ -23,18 +23,16 @@ public class TaskQueueWorker extends HttpServlet {
         String col = request.getParameter("col");
         String blobKey = request.getParameter("blobKey");
         
-        ImagesService imagesService = ImagesServiceFactory.getImagesService();
+        /*ImagesService imagesService = ImagesServiceFactory.getImagesService();
         Image oldImage = ImagesServiceFactory.makeImageFromBlob(new BlobKey(blobKey));
         Transform resize = ImagesServiceFactory.makeResize(500, 500, 0.5, 0.5);
         Image newImage = imagesService.applyTransform(resize, oldImage);
-        byte[] newImageData = newImage.getImageData();
+        byte[] newImageData = newImage.getImageData();*/
         
         // TODO: make sure this is actually an image
-        
-        String image = Base64.encodeAsString(newImageData);
-        
+                
         try {
-			NineTiles.AddImageToTileQueue(row, col, image);
+			NineTiles.AddImageToTileQueue(row, col, blobKey);
 		} catch (EntityNotFoundException e) {
 			// can't really do anything here
 		}

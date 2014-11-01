@@ -29,9 +29,9 @@ public class UploadTile extends HttpServlet {
         } else {
         	// sanitize input
         	int r=1, c=1;
-        	if (row == "1" || row == "2" || row == "3")
+        	if (row.equals("1") || row.equals("2") || row.equals("3"))
         		r = Integer.parseInt(row);
-        	if (col == "1" || col == "2" || col == "3")
+        	if (col.equals("1") || col.equals("2") || col.equals("3"))
         		c = Integer.parseInt(col);
         	NineTiles.AddImageToTaskQueue(r, c, blobKey);
             res.sendRedirect("/");

@@ -48,6 +48,15 @@ public class Setup extends HttpServlet {
 		e.setProperty("QueueSize-7", 0);
 		e.setProperty("QueueSize-8", 0);
 		e.setProperty("QueueSize-9", 0);
+		e.setProperty("Image-1", "default");
+		e.setProperty("Image-2", "default");
+		e.setProperty("Image-3", "default");
+		e.setProperty("Image-4", "default");
+		e.setProperty("Image-5", "default");
+		e.setProperty("Image-6", "default");
+		e.setProperty("Image-7", "default");
+		e.setProperty("Image-8", "default");
+		e.setProperty("Image-9", "default");
 		datastore.put(e);
 
 		// initialize the queues (ImageQueue-1, ImageQueue-2, ...) in the datastore
@@ -63,7 +72,7 @@ public class Setup extends HttpServlet {
 		// initialize the memcache to point to the current images (which are defaults)
 		MemcacheService syncCache = MemcacheServiceFactory.getMemcacheService();
         syncCache.setErrorHandler(ErrorHandlers.getConsistentLogAndContinue(Level.INFO));
-        syncCache.clearAll();
+        syncCache.clearAll(); // clear the memcache first
         syncCache.put("Image-1", "default");
         syncCache.put("Image-2", "default");
         syncCache.put("Image-3", "default");
