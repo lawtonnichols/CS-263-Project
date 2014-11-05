@@ -54,6 +54,53 @@ public class NineTiles {
         }
 	}
 	
+	public static void PopFront(int index) {
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		MemcacheService syncCache = MemcacheServiceFactory.getMemcacheService();
+        syncCache.setErrorHandler(ErrorHandlers.getConsistentLogAndContinue(Level.INFO));
+		Entity main = null;
+		try {
+			main = GetMainEntity();
+		} catch (EntityNotFoundException e) {
+			// something is horribly wrong if we get here
+			e.printStackTrace();
+		}
+		
+		// decrement the queue size
+		int size = ((Long) main.getProperty("QueueSize-"+index)).intValue();
+		if (size == 0) // don't do anything if the size is already 0
+			return;
+		size--;
+		main.setProperty("QueueSize-"+index, size);
+		
+		try {
+			// move everything over one
+			for (int i = 2; i <= size + 1; i++) {
+				Entity queueToUpdate = GetTileQueueAtIndex(index, i-1);
+				Entity queueToUse = GetTileQueueAtIndex(index, i);
+				
+				String img = (String) queueToUse.getProperty("image");
+				queueToUpdate.setProperty("image", img);
+				datastore.put(queueToUpdate);
+			}
+			// set the now-empty queue slot to a default value
+			Entity queueToUpdate = GetTileQueueAtIndex(index, size+1);
+			queueToUpdate.setProperty("image", "default");
+			datastore.put(queueToUpdate);
+			
+			// update the first image in the memcache & main datastore entry
+			Entity firstQueueIndex = GetTileQueueAtIndex(index, 1);
+			String img = (String) firstQueueIndex.getProperty("image");
+			main.setProperty("Image-"+index, img);
+	        syncCache.put("Image-"+index, img);
+	        
+	        datastore.put(main);
+			
+		} catch (Exception e) {
+			// again, totally out of luck if something bad happened here
+		}
+	}
+	
 	public static void AddImageToTileQueue(String row, String col, String blobKey) throws EntityNotFoundException {
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		MemcacheService syncCache = MemcacheServiceFactory.getMemcacheService();

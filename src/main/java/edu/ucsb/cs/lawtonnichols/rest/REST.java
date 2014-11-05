@@ -2,6 +2,8 @@ package edu.ucsb.cs.lawtonnichols.rest;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
+import edu.ucsb.cs.lawtonnichols.*;
+import java.util.*;
 
 @Path("/")
 public class REST {
@@ -19,17 +21,37 @@ public class REST {
 		return "Hello, world! POST\narg: " + arg + "\n";
 	}
 	
-	//@POST
 	@GET
 	@Path("downvote/{row}/{col}")
-	//@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response downvote(@PathParam("row") int row, @PathParam("col") int col) {
-		return Response.status(200).entity("row: " + row + ", col: " + col).build();
+		String ret = "{\"action\": \"downvoted\", \"row\": \"" + row + "\", \"col\": \"" + col + "\"}";
+		int index = (row - 1) * 3 + col;
+		// only do stuff if we got a valid index
+		if (1 <= index && index <= 9 )
+			NineTiles.PopFront(index);
+		return Response.status(200).entity(ret).build();
 	}
 	
 	@GET
 	@Path("getAllTiles")
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response getAllTiles() {
-		return Response.status(200).entity("getAllTiles").build();
+		ArrayList<String> images = new ArrayList<String>();
+		
+		String ret = "{\n";
+
+		// ask the memcache for all the images
+		for (int i = 1; i <= 9; i++) {
+			String tileImage = NineTiles.GetImageForTile(i);
+			ret += "    \"" + i + "\": \"" + tileImage + "\"";
+			if (i < 9) ret += ",\n";
+			else ret += "\n";
+		}
+		
+		ret += "}\n";
+		
+		
+		return Response.status(200).entity(ret).build();
 	}
 }
