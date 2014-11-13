@@ -50,9 +50,8 @@ function downvote(i) {
 	var col = Math.floor(i % 3);
 	if (col == 0)
 		col = 3;
-	$.get("/rest/downvote/"+row+"/"+col, function(result) {
-		// do nothing with the response
-	});
+	var downvoteObject = JSON.stringify({"row": row, "col": col});
+	$.post("/rest/downvote", {"jsonData": downvoteObject});
 }
 
 function updateImages(result) {

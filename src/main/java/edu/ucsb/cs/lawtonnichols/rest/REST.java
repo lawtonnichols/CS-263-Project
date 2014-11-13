@@ -2,8 +2,11 @@ package edu.ucsb.cs.lawtonnichols.rest;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
+
 import edu.ucsb.cs.lawtonnichols.*;
+
 import java.util.*;
+import org.json.*;
 
 @Path("/")
 public class REST {
@@ -21,10 +24,15 @@ public class REST {
 		return "Hello, world! POST\narg: " + arg + "\n";
 	}
 	
-	@GET
-	@Path("downvote/{row}/{col}")
+	@POST
+	@Path("downvote")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response downvote(@PathParam("row") int row, @PathParam("col") int col) {
+	public Response downvote(@FormParam("jsonData") String json) {
+		// convert the string to a json object
+		JSONObject obj = new JSONObject(json);
+		// get the row and column from the json
+		int row = obj.getInt("row");
+		int col = obj.getInt("col");
 		String ret = "{\"action\": \"downvoted\", \"row\": \"" + row + "\", \"col\": \"" + col + "\"}";
 		int index = (row - 1) * 3 + col;
 		// only do stuff if we got a valid index
