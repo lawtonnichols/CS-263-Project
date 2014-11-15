@@ -5,8 +5,16 @@ import javax.ws.rs.core.*;
 
 import edu.ucsb.cs.lawtonnichols.*;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.*;
+
+import org.glassfish.jersey.internal.util.Base64;
 import org.json.*;
+
+import com.google.appengine.api.blobstore.*;
+import com.google.appengine.api.files.*;
+
 
 @Path("/")
 public class REST {
@@ -41,12 +49,36 @@ public class REST {
 		return Response.status(200).entity(ret).build();
 	}
 	
+	@POST
+	@Path("postImage")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response postImage(@FormParam("imageData") String imageData, @FormParam("row") int row, @FormParam("col") int col) {
+		byte[] image = Base64.decode(imageData.getBytes());
+		BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
+		
+		// thank you to http://stackoverflow.com/questions/12328622/writing-byte-array-to-gae-blobstore
+		try {
+			FileService fileService = FileServiceFactory.getFileService();
+			AppEngineFile file = fileService.createNewBlobFile("image/png"); 
+			FileWriteChannel writeChannel = fileService.openWriteChannel(file, true);
+			writeChannel.write(java.nio.ByteBuffer.wrap(image));
+			writeChannel.closeFinally();
+			BlobKey blobKey = fileService.getBlobKey(file);
+			// sanitize input
+			if (1 <= row && row <= 3 && 1 <= col && col <= 3)
+				NineTiles.AddImageToTaskQueue(row, col, blobKey);
+			
+		} catch (Exception e) {
+			
+		}
+		
+		return Response.status(200).entity("{\"success\": \"true\"}").build();
+	}
+	
 	@GET
 	@Path("getAllTiles")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getAllTiles() {
-		ArrayList<String> images = new ArrayList<String>();
-		
+	public Response getAllTiles() {		
 		String ret = "{\n";
 
 		// ask the memcache for all the images

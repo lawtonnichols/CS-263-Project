@@ -45,7 +45,7 @@ public class NineTiles {
         } else {
         	BlobKey blobKey = new BlobKey(image);
         	ImagesService imagesService = ImagesServiceFactory.getImagesService();
-            ServingUrlOptions s = ServingUrlOptions.Builder.withBlobKey(blobKey).imageSize(1000);
+            ServingUrlOptions s = ServingUrlOptions.Builder.withBlobKey(blobKey).imageSize(1000).crop(true);
             try {
             	return imagesService.getServingUrl(s);
             } catch (Exception e) {

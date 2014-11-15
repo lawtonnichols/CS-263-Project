@@ -16,7 +16,6 @@ body {background-color: #fdfdfd;}
 div#table {width: 456px; margin: 0 auto;}
 div#upload {
     width: 400px;
-    height: 200px;
     padding: 1em;
     margin: 0px auto;
     background-color: #FDFDFD;
@@ -33,8 +32,19 @@ table tr:last-child td {border-bottom: none;}
 table td {border-left: 1px solid #fdfdfd;}
 table td:first-child {border-left: none;}*/
 table {border-collapse: separate; border-spacing: 3px 3px;}
+video#myVideo {display: none;}
+canvas#myCanvas {width: 370px; margin: 0 auto;}
 </style>
 <script>
+
+// taken from http://matthewschrager.com/2013/05/25/how-to-take-webcam-pictures-from-browser-and-store-server-side/
+navigator.getUserMedia = ( navigator.getUserMedia ||
+                       navigator.webkitGetUserMedia ||
+                       navigator.mozGetUserMedia ||
+                       navigator.msGetUserMedia);
+                       
+window.URL = (window.URL || window.mozURL || window.webkitURL);
+
 function showUpload(i) {
 	var row = Math.floor((i-1) / 3) + 1;
 	var col = Math.floor(i % 3);
@@ -129,6 +139,95 @@ $(document).ready(function () {
 	$(document).on('contextmenu', function(e) {
 	    e.preventDefault();
 	});
+	
+	$("#submitImage").click(function() {
+		// extract the image data from the canvas in base 64
+		// encoded JPG format
+		var imgData = canvas.toDataURL('img/png');
+		
+		console.log(imgData);
+
+		// remove extraneous data from start of string
+		imgData = imgData.replace('data:image/png;base64,', '');
+		
+		console.log(imgData);
+		
+		var r = $("#selectrow").val();
+		var c = $("#selectcol").val();
+
+		/*// JSON-encode it
+		var postData = JSON.stringify({ imageData: imgData, row: r, col: c });
+
+		// Post it to the server
+		$.ajax({
+			url: '/rest/postImage',
+			type: "POST",
+			data: postData,
+			contentType: "application/json"
+		});*/
+		
+		$.post("/rest/postImage", {"imageData": imgData, "row": r, "col": c});
+		
+		location.reload();
+	});
+	
+	function drawImage(canvas, video) {
+		try {
+			canvas.getContext('2d').drawImage(video, 0, 0);
+		  } catch (e) {
+		    if (e.name == "NS_ERROR_NOT_AVAILABLE") {
+		      setTimeout(function () { drawImage(canvas, video); }, 0);
+		    } else {
+		      throw e;
+		    }
+  		}
+	}
+	
+	// get the canvas element
+	var canvas = document.getElementById("myCanvas");
+	
+	// get the video element
+	var video = document.getElementById("myVideo");
+	
+	// adapted from https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Taking_still_photos
+	function takepicture() {
+		try {
+		    canvas.width = 352;
+		    canvas.height = 288;
+		    canvas.getContext('2d').drawImage(video, 0, 0, 352, 288);
+		    var data = canvas.toDataURL('image/jpeg');
+		    photo.setAttribute('src', data);
+		} catch (e) {
+			setTimeout(takepicture, 0);
+		}
+	  }
+	
+	// also taken from http://matthewschrager.com/2013/05/25/how-to-take-webcam-pictures-from-browser-and-store-server-side/
+	navigator.getUserMedia({ video: true }, function(stream) {
+		// get the video element
+		var video = document.getElementById("myVideo");
+
+		// set it to receive input from the webcam
+		video.src = window.URL.createObjectURL(stream);
+
+		video.play();
+		
+		
+		
+
+		// Wait 50 milliseconds to allow the webcam to capture some video
+		setTimeout(function () {
+			// set the canvas height/width to the size of the video
+			//canvas.width = video.videoWidth;
+			//canvas.height = video.videoHeight;
+
+			// draw the video frame to the canvas
+			takepicture();
+			
+			
+			
+		}, 50);
+	}, function (e) {console.log(e);});
 });
 </script>
 </head>
@@ -152,9 +251,13 @@ $(document).ready(function () {
 	        	<option value="3">3</option>
 	        </select>
 	    </p>
+	    <canvas id="myCanvas"></canvas>
+	    <video id="myVideo"></video>
+	    <p>&nbsp;</p>
 	    <p class="text-center">
-	        <input type="file" name="file">
-	        <input type="submit" value="Submit">
+	        <input type="file" accept="image/*" name="file">
+	        <input type="submit" value="Submit File">
+	        <input type="button" id="submitImage" value="Submit Current Image">
 	    </p>
 	    <p class="text-center">
 	    	<a href="#" id="closeButton">[close]</a>
