@@ -57,6 +57,16 @@ public class Setup extends HttpServlet {
 		e.setProperty("Image-7", "default");
 		e.setProperty("Image-8", "default");
 		e.setProperty("Image-9", "default");
+		e.setProperty("DownvoteCount-1", 0);
+		e.setProperty("DownvoteCount-2", 0);
+		e.setProperty("DownvoteCount-3", 0);
+		e.setProperty("DownvoteCount-4", 0);
+		e.setProperty("DownvoteCount-5", 0);
+		e.setProperty("DownvoteCount-6", 0);
+		e.setProperty("DownvoteCount-7", 0);
+		e.setProperty("DownvoteCount-8", 0);
+		e.setProperty("DownvoteCount-9", 0);
+		e.setProperty("PageViewCount", 0);
 		datastore.put(e);
 
 		// initialize the queues (ImageQueue-1, ImageQueue-2, ...) in the datastore

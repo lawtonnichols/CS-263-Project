@@ -1,5 +1,6 @@
 package edu.ucsb.cs.lawtonnichols;
 
+import java.util.Date;
 import java.util.Random;
 import java.util.logging.Level;
 
@@ -52,6 +53,68 @@ public class NineTiles {
             	return "defaultTile.png?"+image;
             }
         }
+	}
+	
+	public static void IncrementPageViewCount() {
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		
+		Entity main = null;
+		try {
+			main = GetMainEntity();
+		} catch (EntityNotFoundException e) {
+			// something is horribly wrong if we get here
+			e.printStackTrace();
+		}
+		int count;
+		if ((new Date()).getSeconds() % 5 == 0) {
+			// reset count every five seconds
+			count = 0;
+			
+			// reset all the downvote counts too
+			main.setProperty("DownvoteCount-1", 0);
+			main.setProperty("DownvoteCount-2", 0);
+			main.setProperty("DownvoteCount-3", 0);
+			main.setProperty("DownvoteCount-4", 0);
+			main.setProperty("DownvoteCount-5", 0);
+			main.setProperty("DownvoteCount-6", 0);
+			main.setProperty("DownvoteCount-7", 0);
+			main.setProperty("DownvoteCount-8", 0);
+			main.setProperty("DownvoteCount-9", 0);
+		}
+		else {
+			count = ((Long) main.getProperty("PageViewCount")).intValue();
+			count++;
+		}
+		main.setProperty("PageViewCount", count);
+		
+		datastore.put(main);
+	}
+	
+	public static void TryToPopFront(int index) {
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		
+		// get the current downvote count and add one
+		Entity main = null;
+		try {
+			main = GetMainEntity();
+		} catch (EntityNotFoundException e) {
+			// something is horribly wrong if we get here
+			e.printStackTrace();
+		}
+		int pageviewcount = ((Long) main.getProperty("PageViewCount")).intValue();
+		int downvotecount = ((Long) main.getProperty("DownvoteCount-"+index)).intValue();
+		// can never divide by 0 if downvotecount is incremented here
+		downvotecount++;
+		
+		// 3 is a heuristic that seems to work
+		if (pageviewcount / downvotecount >= 3) {
+			// set the downvote count back to zero now
+			downvotecount = 0;
+			
+			NineTiles.PopFront(index);
+		}
+		main.setProperty("DownvoteCount-"+index, downvotecount);
+		datastore.put(main);
 	}
 	
 	public static void PopFront(int index) {

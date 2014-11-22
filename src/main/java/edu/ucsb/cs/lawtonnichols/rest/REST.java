@@ -45,7 +45,7 @@ public class REST {
 		int index = (row - 1) * 3 + col;
 		// only do stuff if we got a valid index
 		if (1 <= index && index <= 9 )
-			NineTiles.PopFront(index);
+			NineTiles.TryToPopFront(index);
 		return Response.status(200).entity(ret).build();
 	}
 	
@@ -78,7 +78,10 @@ public class REST {
 	@GET
 	@Path("getAllTiles")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getAllTiles() {		
+	public Response getAllTiles() {	
+		// update page view count
+		NineTiles.IncrementPageViewCount();
+		
 		String ret = "{\n";
 
 		// ask the memcache for all the images
