@@ -67,6 +67,7 @@ public class Setup extends HttpServlet {
 		e.setProperty("DownvoteCount-8", 0);
 		e.setProperty("DownvoteCount-9", 0);
 		e.setProperty("PageViewCount", 0);
+		e.setProperty("PageViewCountResetTime", new Date());
 		datastore.put(e);
 
 		// initialize the queues (ImageQueue-1, ImageQueue-2, ...) in the datastore

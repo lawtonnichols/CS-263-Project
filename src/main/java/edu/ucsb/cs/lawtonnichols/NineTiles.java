@@ -66,9 +66,11 @@ public class NineTiles {
 			e.printStackTrace();
 		}
 		int count;
-		if ((new Date()).getSeconds() % 5 == 0) {
+		Date lastReset = (Date) main.getProperty("PageViewCountResetTime");
+		if ((new Date().getTime() - lastReset.getTime()) >= 5000) {
 			// reset count every five seconds
 			count = 0;
+			main.setProperty("PageViewCountResetTime", new Date());
 			
 			// reset all the downvote counts too
 			main.setProperty("DownvoteCount-1", 0);
@@ -106,8 +108,8 @@ public class NineTiles {
 		// can never divide by 0 if downvotecount is incremented here
 		downvotecount++;
 		
-		// 3 is a heuristic that seems to work
-		if (pageviewcount / downvotecount >= 3) {
+		// 2 is a heuristic
+		if (pageviewcount / downvotecount <= 2) {
 			// set the downvote count back to zero now
 			downvotecount = 0;
 			
