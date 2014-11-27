@@ -108,8 +108,12 @@ public class NineTiles {
 		// can never divide by 0 if downvotecount is incremented here
 		downvotecount++;
 		
+		Date imageResetTime = (Date) main.getProperty("ImageResetTime-"+index);
+		
+		// only pop the front if we have the right pageview/downvote ratio,
+		// or if the image has been up there for over an hour
 		// 2 is a heuristic
-		if (pageviewcount / downvotecount <= 2) {
+		if (pageviewcount / downvotecount <= 2 || imageResetTime.before(new Date(System.currentTimeMillis() - 1000 * 60 * 60))) {
 			// set the downvote count back to zero now
 			downvotecount = 0;
 			
@@ -159,6 +163,9 @@ public class NineTiles {
 			main.setProperty("Image-"+index, img);
 	        syncCache.put("Image-"+index, img);
 	        
+	        // update the image reset time
+	        main.setProperty("ImageResetTime-"+index, new Date());
+	        
 	        datastore.put(main);
 			
 		} catch (Exception e) {
@@ -192,6 +199,10 @@ public class NineTiles {
 			// change the tile if this is the first one added
 			if (size + 1 == 1) {
 				main.setProperty("Image-"+i, blobKey);
+				
+				// update the image reset time
+				main.setProperty("ImageResetTime-"+i, new Date());
+				
 		        syncCache.put("Image-"+i, blobKey);
 			}
 			

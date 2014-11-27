@@ -66,6 +66,15 @@ public class Setup extends HttpServlet {
 		e.setProperty("DownvoteCount-7", 0);
 		e.setProperty("DownvoteCount-8", 0);
 		e.setProperty("DownvoteCount-9", 0);
+		e.setProperty("ImageResetTime-1", new Date());
+		e.setProperty("ImageResetTime-2", new Date());
+		e.setProperty("ImageResetTime-3", new Date());
+		e.setProperty("ImageResetTime-4", new Date());
+		e.setProperty("ImageResetTime-5", new Date());
+		e.setProperty("ImageResetTime-6", new Date());
+		e.setProperty("ImageResetTime-7", new Date());
+		e.setProperty("ImageResetTime-8", new Date());
+		e.setProperty("ImageResetTime-9", new Date());
 		e.setProperty("PageViewCount", 0);
 		e.setProperty("PageViewCountResetTime", new Date());
 		datastore.put(e);
