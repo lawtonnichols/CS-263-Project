@@ -18,12 +18,19 @@ import com.google.appengine.api.datastore.Query.*;
 
 
 public class NineTiles {
+	/**
+	 * Sends an image blob to the task queue to be inserted in the proper location in a tile's queue 
+	 */
 	public static void AddImageToTaskQueue(int row, int col, BlobKey b) {
 		// add it to the task queue to be converted and added
 		Queue queue = QueueFactory.getDefaultQueue();
 		queue.add(withUrl("/worker").param("type", "Convert").param("row", row + "").param("col", col + "").param("blobKey", b.getKeyString()));
 	}
 	
+	/**
+	 * Returns the URL for the current image in the given tile. Crops the 
+	 * picture into a square, too.
+	 */
 	public static String GetImageForTile(int t) {
 		MemcacheService syncCache = MemcacheServiceFactory.getMemcacheService();
         syncCache.setErrorHandler(ErrorHandlers.getConsistentLogAndContinue(Level.INFO));
@@ -55,6 +62,10 @@ public class NineTiles {
         }
 	}
 	
+	/**
+	 * Updates the page view count, or resets it to zero if five seconds
+	 * have passed since the last time we counted.
+	 */
 	public static void IncrementPageViewCount() {
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		
@@ -92,6 +103,12 @@ public class NineTiles {
 		datastore.put(main);
 	}
 	
+	/**
+	 * Handle a downvote on the given tile index. If we received enough
+	 * downvote requests in 5 seconds, we will then update the current
+	 * image with the next in line.
+	 * @param index
+	 */
 	public static void TryToPopFront(int index) {
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		
@@ -123,6 +140,11 @@ public class NineTiles {
 		datastore.put(main);
 	}
 	
+	/**
+	 * Removes the current image tile at the given index, and replaces
+	 * it with the next image waiting in the queue for that tile.
+	 * @param index
+	 */
 	public static void PopFront(int index) {
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		MemcacheService syncCache = MemcacheServiceFactory.getMemcacheService();
@@ -173,6 +195,14 @@ public class NineTiles {
 		}
 	}
 	
+	/**
+	 * Adds a reference to the image into the queue for a given tile.
+	 * Used in conjunction with AddImageToTaskQueue
+	 * @param row
+	 * @param col
+	 * @param blobKey
+	 * @throws EntityNotFoundException
+	 */
 	public static void AddImageToTileQueue(String row, String col, String blobKey) throws EntityNotFoundException {
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		MemcacheService syncCache = MemcacheServiceFactory.getMemcacheService();
@@ -219,11 +249,23 @@ public class NineTiles {
 		}
 	}
 	
+	/**
+	 * Gets the datastore Entity named "main"
+	 * @return
+	 * @throws EntityNotFoundException
+	 */
 	public static Entity GetMainEntity() throws EntityNotFoundException {
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		return datastore.get(KeyFactory.createKey("Main", "main"));
 	}
 	
+	/**
+	 * Gets the datastore Entity for the given tile at a given queue index.
+	 * @param rowcol
+	 * @param index
+	 * @return
+	 * @throws EntityNotFoundException
+	 */
 	public static Entity GetTileQueueAtIndex(int rowcol, int index) throws EntityNotFoundException {
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		return datastore.get(KeyFactory.createKey("ImageQueue-"+rowcol, index+""));

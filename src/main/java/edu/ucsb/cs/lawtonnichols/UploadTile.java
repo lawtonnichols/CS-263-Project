@@ -14,7 +14,11 @@ import com.google.appengine.api.blobstore.*;
 
 public class UploadTile extends HttpServlet {
     private BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
-
+    
+    /**
+     * Takes an uploaded image file and adds it to the task queue to
+     * be inserted in the proper tile image queue.
+     */
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse res)
         throws ServletException, IOException {

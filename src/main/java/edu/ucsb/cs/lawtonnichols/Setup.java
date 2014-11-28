@@ -24,6 +24,12 @@ import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
 
 public class Setup extends HttpServlet {
+	
+	/**
+	 * This is meant to be run only once after deploying the app to App Engine.
+	 * It resets the datastore, memcache, and blobstore to some default values
+	 * that allow the app to function normally.
+	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();

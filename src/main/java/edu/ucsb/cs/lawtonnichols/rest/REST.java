@@ -18,6 +18,9 @@ import com.google.appengine.api.files.*;
 
 @Path("/")
 public class REST {
+	/**
+	 * A test of REST GET functionality 
+	 */
 	@GET
 	@Path("test")
 	@Produces(MediaType.TEXT_PLAIN)
@@ -25,6 +28,9 @@ public class REST {
 		return "Hello, world! GET";
 	}
 	
+	/**
+	 * A test of REST POST functionality 
+	 */
 	@POST
 	@Path("posttest")
 	@Produces(MediaType.TEXT_PLAIN)
@@ -32,6 +38,11 @@ public class REST {
 		return "Hello, world! POST\narg: " + arg + "\n";
 	}
 	
+	/**
+	 * Handles a POST request to downvote a certain tile. 
+	 * @param json The tile to downvote
+	 * @return A confirmation that the downvote request was received
+	 */
 	@POST
 	@Path("downvote")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -49,6 +60,9 @@ public class REST {
 		return Response.status(200).entity(ret).build();
 	}
 	
+	/**
+	 * Handles the uploading of a webcam image.
+	 */
 	@POST
 	@Path("postImage")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -57,6 +71,7 @@ public class REST {
 		BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
 		
 		// thank you to http://stackoverflow.com/questions/12328622/writing-byte-array-to-gae-blobstore
+		// these deprecated features are necessary--there doesn't seem to be any other way to do what I want to do
 		try {
 			FileService fileService = FileServiceFactory.getFileService();
 			AppEngineFile file = fileService.createNewBlobFile("image/png"); 
@@ -75,6 +90,10 @@ public class REST {
 		return Response.status(200).entity("{\"success\": \"true\"}").build();
 	}
 	
+	/**
+	 * Retrieves the URLs for the current tile
+	 * @return A JSON object with links for each current tile image.
+	 */
 	@GET
 	@Path("getAllTiles")
 	@Produces(MediaType.APPLICATION_JSON)

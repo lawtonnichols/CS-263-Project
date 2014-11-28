@@ -17,6 +17,11 @@ import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.images.*;
 
 public class TaskQueueWorker extends HttpServlet {
+	
+	/**
+	 * Processes a newly added image in the background. It adds it to the
+	 * tile queue for the given index.
+	 */
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String row = request.getParameter("row");

@@ -13,6 +13,10 @@ import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
 public class ViewBlob extends HttpServlet {
     private BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
 
+    /**
+     * This is a test function that shows the image that was
+     * uploaded into the blobstore with the given BlobKey
+     */
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse res)
         throws IOException {
