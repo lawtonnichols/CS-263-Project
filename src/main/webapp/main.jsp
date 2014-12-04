@@ -3,6 +3,7 @@
 <%@ page import="edu.ucsb.cs.lawtonnichols.*" %>
 <% 
 	BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
+	String uploadURL = blobstoreService.createUploadUrl("/upload");
 %>
 <html>
 <head>
@@ -145,12 +146,12 @@ $(document).ready(function () {
 		// encoded JPG format
 		var imgData = canvas.toDataURL('img/png');
 		
-		console.log(imgData);
+		//console.log(imgData);
 
 		// remove extraneous data from start of string
 		imgData = imgData.replace('data:image/png;base64,', '');
 		
-		console.log(imgData);
+		//console.log(imgData);
 		
 		var r = $("#selectrow").val();
 		var c = $("#selectcol").val();
@@ -166,9 +167,13 @@ $(document).ready(function () {
 			contentType: "application/json"
 		});*/
 		
-		$.post("/rest/postImage", {"imageData": imgData, "row": r, "col": c});
+		$.post("/rest/postImage", {"imageData": imgData, "row": r, "col": c},
+			function (data, textStatus, jqXHR) {
+				console.log(data);
+		});
 		
-		location.reload();
+		//location.reload();
+		$("#upload").hide();
 	});
 	
 	function drawImage(canvas, video) {
@@ -236,7 +241,7 @@ $(document).ready(function () {
 	<p class="text-center"><em>Left-click to downvote, Right-click to upload</em></p>
 	<div id="upload">
 	<h3 class="text-center">Upload</h3>
-    <form action="<%= blobstoreService.createUploadUrl("/upload") %>" method="post" enctype="multipart/form-data">
+    <form action="<%= uploadURL %>" method="post" enctype="multipart/form-data">
         <p class="text-center">Row: 
 	        <select name="row" id="selectrow">
 	        	<option value="1">1</option>

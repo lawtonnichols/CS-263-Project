@@ -14,6 +14,8 @@ import org.json.*;
 
 import com.google.appengine.api.blobstore.*;
 import com.google.appengine.api.files.*;
+import com.google.appengine.api.log.*;
+
 
 
 @Path("/")
@@ -84,7 +86,8 @@ public class REST {
 				NineTiles.AddImageToTaskQueue(row, col, blobKey);
 			
 		} catch (Exception e) {
-			
+			java.util.logging.Logger.getGlobal().warning(e.toString());
+			return Response.status(200).entity("{\"error\": \"" + e + "\"}").build();
 		}
 		
 		return Response.status(200).entity("{\"success\": \"true\"}").build();
