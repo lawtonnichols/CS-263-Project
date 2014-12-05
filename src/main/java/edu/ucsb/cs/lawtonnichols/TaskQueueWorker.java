@@ -24,9 +24,7 @@ public class TaskQueueWorker extends HttpServlet {
 	 */
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String row = request.getParameter("row");
-        String col = request.getParameter("col");
-        String blobKey = request.getParameter("blobKey");
+    	String type = request.getParameter("type");
         
         /*ImagesService imagesService = ImagesServiceFactory.getImagesService();
         Image oldImage = ImagesServiceFactory.makeImageFromBlob(new BlobKey(blobKey));
@@ -34,13 +32,19 @@ public class TaskQueueWorker extends HttpServlet {
         Image newImage = imagesService.applyTransform(resize, oldImage);
         byte[] newImageData = newImage.getImageData();*/
         
-        // TODO: make sure this is actually an image
-                
-        try {
-			NineTiles.AddImageToTileQueue(row, col, blobKey);
-		} catch (EntityNotFoundException e) {
-			// can't really do anything here
-		}
+        if (type.equals("Convert")) {    
+	        try {
+	        	String row = request.getParameter("row");
+	            String col = request.getParameter("col");
+	            String blobKey = request.getParameter("blobKey");
+				NineTiles.AddImageToTileQueue(row, col, blobKey);
+			} catch (EntityNotFoundException e) {
+				// can't really do anything here
+			}
+        } else if (type.equals("Downvote")) {
+        	int index = Integer.parseInt(request.getParameter("index"));
+        	NineTiles.PopFront(index);
+        }
         
     }
 

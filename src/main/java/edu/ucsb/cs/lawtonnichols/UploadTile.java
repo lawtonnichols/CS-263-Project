@@ -26,7 +26,12 @@ public class UploadTile extends HttpServlet {
         Map<String, List<BlobKey>> blobs = blobstoreService.getUploads(req);
         String row = req.getParameter("row");
         String col = req.getParameter("col");
-        BlobKey blobKey = blobs.get("file").get(0);
+        BlobKey blobKey = null;
+        // make sure we actually got a file
+        if (blobs.get("file") != null)
+        	blobKey = blobs.get("file").get(0);
+        else
+        	res.sendRedirect("/");
 
         if (blobKey == null) {
             res.sendRedirect("/");

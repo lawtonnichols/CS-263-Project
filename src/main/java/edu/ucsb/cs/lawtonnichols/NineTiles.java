@@ -74,6 +74,7 @@ public class NineTiles {
 			main = GetMainEntity();
 		} catch (EntityNotFoundException e) {
 			// something is horribly wrong if we get here
+			// /setup was most likely not run
 			e.printStackTrace();
 		}
 		int count;
@@ -133,8 +134,12 @@ public class NineTiles {
 		if (pageviewcount / downvotecount <= 2 || imageResetTime.before(new Date(System.currentTimeMillis() - 1000 * 60 * 60))) {
 			// set the downvote count back to zero now
 			downvotecount = 0;
-			
-			NineTiles.PopFront(index);
+			main.setProperty("DownvoteCount-"+index, downvotecount);
+			datastore.put(main);
+			//NineTiles.PopFront(index);
+			Queue queue = QueueFactory.getDefaultQueue();
+			queue.add(withUrl("/worker").param("type", "Downvote").param("index", index + ""));
+			return;
 		}
 		main.setProperty("DownvoteCount-"+index, downvotecount);
 		datastore.put(main);
@@ -166,7 +171,7 @@ public class NineTiles {
 		
 		try {
 			// move everything over one
-			for (int i = 2; i <= size + 1; i++) {
+			for (int i = 2; i <= size + 1 && i <= 100; i++) {
 				Entity queueToUpdate = GetTileQueueAtIndex(index, i-1);
 				Entity queueToUse = GetTileQueueAtIndex(index, i);
 				
@@ -191,7 +196,7 @@ public class NineTiles {
 	        datastore.put(main);
 			
 		} catch (Exception e) {
-			// again, totally out of luck if something bad happened here
+			java.util.logging.Logger.getGlobal().warning(e.toString());
 		}
 	}
 	
