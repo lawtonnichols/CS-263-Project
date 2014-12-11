@@ -68,9 +68,24 @@ public class REST {
 	@POST
 	@Path("postImage")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response postImage(@FormParam("imageData") String imageData, @FormParam("row") int row, @FormParam("col") int col) {
+	public Response postImage(@FormParam("image") String json) {
+		JSONObject obj;
+		int row, col;
+		
+		try {
+			obj = new JSONObject(json);
+			row = obj.getInt("row");
+			col = obj.getInt("col");
+		} catch (Exception e) {
+			return Response.status(200).entity("{\"error\": \"" + e + "\"}").build();
+		}
+		
+		String imageData = obj.getString("imageData");
 		byte[] image = Base64.decode(imageData.getBytes());
 		BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
+		
+		if (imageData.length() == 0)
+			return Response.status(200).entity("{\"success\": \"false\"}").build();
 		
 		// thank you to http://stackoverflow.com/questions/12328622/writing-byte-array-to-gae-blobstore
 		// these deprecated features are necessary--there doesn't seem to be any other way to do what I want to do

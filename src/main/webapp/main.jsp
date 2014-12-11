@@ -167,7 +167,9 @@ $(document).ready(function () {
 			contentType: "application/json"
 		});*/
 		
-		$.post("/rest/postImage", {"imageData": imgData, "row": r, "col": c},
+		var json = JSON.stringify({"imageData": imgData, "row": r, "col": c});
+		
+		$.post("/rest/postImage", {"image": json},
 			function (data, textStatus, jqXHR) {
 				console.log(data);
 		});
