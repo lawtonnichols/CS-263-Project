@@ -41,7 +41,7 @@ public class NineTiles {
         		Entity main = NineTiles.GetMainEntity();
         		image = (String) main.getProperty("Image-"+t);
         		syncCache.put("Image-"+t, image);
-        		if (image == null) // this probably means that setup hasn't been run
+        		if (image == null) // this probably means that /setup hasn't been run
         			return "defaultTile.png?thisisaproblem";
         	} catch (EntityNotFoundException e) {
         		return "/defaultTile.png?wasnull";
@@ -119,6 +119,7 @@ public class NineTiles {
 			main = GetMainEntity();
 		} catch (EntityNotFoundException e) {
 			// something is horribly wrong if we get here
+			// (it means we didn't run /setup)
 			e.printStackTrace();
 		}
 		int pageviewcount = ((Long) main.getProperty("PageViewCount")).intValue();
@@ -159,6 +160,7 @@ public class NineTiles {
 			main = GetMainEntity();
 		} catch (EntityNotFoundException e) {
 			// something is horribly wrong if we get here
+			// (it means we didn't run /setup)
 			e.printStackTrace();
 		}
 		
@@ -205,7 +207,7 @@ public class NineTiles {
 	 * Used in conjunction with AddImageToTaskQueue
 	 * @param row
 	 * @param col
-	 * @param blobKey
+	 * @param blobKey the blobKey for the uploaded image
 	 * @throws EntityNotFoundException
 	 */
 	public static void AddImageToTileQueue(String row, String col, String blobKey) throws EntityNotFoundException {
@@ -266,8 +268,8 @@ public class NineTiles {
 	
 	/**
 	 * Gets the datastore Entity for the given tile at a given queue index.
-	 * @param rowcol
-	 * @param index
+	 * @param rowcol which tile (1–9)
+	 * @param index the queue index
 	 * @return
 	 * @throws EntityNotFoundException
 	 */
