@@ -8,10 +8,10 @@
 <html>
 <head>
 <title>NineTiles</title>
+<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap-theme.min.css">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
-<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
 <style>
 body {background-color: #fdfdfd;}
 div#table {width: 456px; margin: 0 auto;}
@@ -167,7 +167,9 @@ $(document).ready(function () {
 			contentType: "application/json"
 		});*/
 		
-		$.post("/rest/postImage", {"imageData": imgData, "row": r, "col": c},
+		var json = JSON.stringify({"imageData": imgData, "row": r, "col": c});
+		
+		$.post("/rest/postImage", {"image": json},
 			function (data, textStatus, jqXHR) {
 				console.log(data);
 		});

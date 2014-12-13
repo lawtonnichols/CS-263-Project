@@ -20,6 +20,9 @@ import com.google.appengine.api.datastore.Query.*;
 public class NineTiles {
 	/**
 	 * Sends an image blob to the task queue to be inserted in the proper location in a tile's queue 
+	 * @param row
+	 * @param col
+	 * @param b the blobkey for the blob
 	 */
 	public static void AddImageToTaskQueue(int row, int col, BlobKey b) {
 		// add it to the task queue to be converted and added
@@ -30,6 +33,8 @@ public class NineTiles {
 	/**
 	 * Returns the URL for the current image in the given tile. Crops the 
 	 * picture into a square, too.
+	 * @param t tile index (1-9)
+	 * @return the URL for the current image in that tile
 	 */
 	public static String GetImageForTile(int t) {
 		MemcacheService syncCache = MemcacheServiceFactory.getMemcacheService();
@@ -108,7 +113,7 @@ public class NineTiles {
 	 * Handle a downvote on the given tile index. If we received enough
 	 * downvote requests in 5 seconds, we will then update the current
 	 * image with the next in line.
-	 * @param index
+	 * @param index (1-9)
 	 */
 	public static void TryToPopFront(int index) {
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -149,7 +154,7 @@ public class NineTiles {
 	/**
 	 * Removes the current image tile at the given index, and replaces
 	 * it with the next image waiting in the queue for that tile.
-	 * @param index
+	 * @param index (1-9)
 	 */
 	public static void PopFront(int index) {
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -258,7 +263,7 @@ public class NineTiles {
 	
 	/**
 	 * Gets the datastore Entity named "main"
-	 * @return
+	 * @return the main entity
 	 * @throws EntityNotFoundException
 	 */
 	public static Entity GetMainEntity() throws EntityNotFoundException {
@@ -270,7 +275,7 @@ public class NineTiles {
 	 * Gets the datastore Entity for the given tile at a given queue index.
 	 * @param rowcol which tile (1–9)
 	 * @param index the queue index
-	 * @return
+	 * @return the tile queue entity for that index
 	 * @throws EntityNotFoundException
 	 */
 	public static Entity GetTileQueueAtIndex(int rowcol, int index) throws EntityNotFoundException {
