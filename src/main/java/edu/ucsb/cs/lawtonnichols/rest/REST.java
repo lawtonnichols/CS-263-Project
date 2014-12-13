@@ -64,6 +64,7 @@ public class REST {
 	
 	/**
 	 * Handles the uploading of a webcam image.
+	 * @param json A JSON object containing the image, the row, and the column
 	 * @return success or failure JSON object
 	 */
 	@POST

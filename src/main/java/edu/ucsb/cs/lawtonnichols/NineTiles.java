@@ -22,7 +22,7 @@ public class NineTiles {
 	 * Sends an image blob to the task queue to be inserted in the proper location in a tile's queue 
 	 * @param row
 	 * @param col
-	 * @param b the blobkey for the blob
+	 * @param b the blobkey for the image blob
 	 */
 	public static void AddImageToTaskQueue(int row, int col, BlobKey b) {
 		// add it to the task queue to be converted and added
